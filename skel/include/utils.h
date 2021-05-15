@@ -83,4 +83,7 @@ int current_time_to_string(char *, size_t, const char *);
 int check_old_logfile(char *);
 int init_logdir(char *);
 
+ssize_t xread(int fd, void *buf, size_t count);
+ssize_t xwrite(int fd, const void *buf, size_t count);
+
 #endif

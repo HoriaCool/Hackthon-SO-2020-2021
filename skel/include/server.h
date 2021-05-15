@@ -23,10 +23,18 @@ typedef int HANDLE;
 #define SEND_FLAGS		0
 #endif
 
+#ifdef __unix__
+#define MUTEX pthread_mutex_t
+#elif defined(_WIN32)
+#define MUTEX WIND_MUTEX // TODO
+#endif
+
 struct logmemcache_cache {
 	char *service_name;
 	void *ptr;
-	size_t pages;
+	size_t pages, logs, file_logs;
+	int fd;
+
 };
 
 struct logmemcache_client_st {
@@ -51,5 +59,14 @@ int logmemcache_unsubscribe_os(struct logmemcache_client_st *);
 int logmemcache_add_log_os(struct logmemcache_client_st *,
 	struct client_logline *);
 int logmemcache_flush_os(struct logmemcache_client_st *);
+
+int logmemcache_send_loglines_os(struct logmemcache_client_st *client);
+int logmemcache_send_stats_os(struct logmemcache_client_st *);
+
+/* OS Specific functions threading */
+void mutex_init_os(pthread_mutex_t *lock);
+void mutex_destroy_os(pthread_mutex_t *lock);
+void mutex_lock_os(pthread_mutex_t *lock);
+void mutex_unlock_os(pthread_mutex_t *lock);
 
 #endif

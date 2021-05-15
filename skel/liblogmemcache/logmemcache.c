@@ -131,10 +131,11 @@ struct client_logline **logmemcache_get_logs(struct logmemcache_st *client,
 {
 	char buffer[COMMAND_SIZE], response[LINE_SIZE];
 	struct client_logline **lines;
-	uint64_t num_logs, i;
+	// uint64_t num_logs, i;
+	size_t num_logs, i;
 	const struct op *op;
 	size_t len;
-	int rc;
+	// int rc;
 
 	memset(buffer, 0, sizeof(buffer));
 
@@ -144,17 +145,22 @@ struct client_logline **logmemcache_get_logs(struct logmemcache_st *client,
 		fprintf(stderr, "Error while getting logs from server\n");
 		return NULL;
 	}
-	num_logs = 0;
+	num_logs = -1;
 
-	memset(response, 0, sizeof(response));
-	if (recv_data(client->socket, response, sizeof(response), 0) < 0) {
+	// memset(response, 0, sizeof(response));
+	// if (recv_data(client->socket, response, sizeof(response), 0) < 0) {
+	// 	fprintf(stderr, "Error while getting status from server\n");
+	// 	return NULL;
+	// }
+
+	// rc = sscanf(response, UINT64_FMT, &num_logs);
+	// if (rc == 0)
+	// 	return NULL;
+
+	if (recv_data(client->socket, &num_logs, sizeof(num_logs), 0) < 0) {
 		fprintf(stderr, "Error while getting status from server\n");
 		return NULL;
 	}
-
-	rc = sscanf(response, UINT64_FMT, &num_logs);
-	if (rc == 0)
-		return NULL;
 
 	if (num_logs != 0)
 		lines = calloc((size_t)num_logs, sizeof(*lines));
@@ -278,7 +284,7 @@ int logmemcache_get_logline(char *logline, struct client_logline *line,
 	if (len <= LOGLINE_SIZE)
 		return -1;
 
-	strncpy(logline, (char *) ((long)line->logline - 1), LOGLINE_SIZE);
+	strncpy(logline, (char *) line->logline, LOGLINE_SIZE);
 	logline[LOGLINE_SIZE] = '\0';
 
 	return 0;
