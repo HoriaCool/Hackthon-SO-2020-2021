@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS = -fPIC -Wall
-LDLIBS = -lpthread -pthread
+LDLIBS = -lpthread -pthread -lm
 
 .PHONY: build
 build: liblogmemcache.so logmemcached
@@ -14,16 +14,19 @@ logmemcache.o: liblogmemcache/logmemcache.c include/logmemcache.h include/utils.
 logmemcache_os.o: liblogmemcache/lin/logmemcache_os.c include/logmemcache.h include/utils.h
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-logmemcached: server.o server_os.o utils.o
-	$(CC) $(LDLIBS) -o $@ $^
+logmemcached: server.o server_os.o utils.o thpool.o
+	$(CC) -o $@ $^ $(LDLIBS)
 
 server.o: server/server.c include/server.h include/utils.h
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-server_os.o: server/lin/server_os.c include/server.h include/utils.h
+server_os.o: server/lin/server_os.c include/server.h include/utils.h include/thpool.h
 	$(CC) $(CFLAGS) -o $@ -c $< $(LDLIBS)
 
 utils.o: utils.c include/utils.h
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+thpool.o: server/thpool.c include/thpool.h
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 .PHONY: clean
